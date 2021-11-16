@@ -133,3 +133,27 @@ echo "owncloud_fqdn="$owncloud_fqdn
 echo "owncloud_db_password="$owncloud_db_password
 echo "owncloud_admin_username="$owncloud_admin_username
 echo "owncloud_admin_password="$owncloud_admin_password
+
+echo "Installing dependences"
+dnf upgrade
+dnf makecache && dnf install epel-release -y && dnf makecache &&  dnf install ansible && nano -y
+yum install -y python38 git
+
+python3.8 -m venv ~/ansible && source ~/ansible/bin/activate 
+pip install --upgrade pip
+pip3 install ansible
+cd /opt/
+git clone https://github.com/owncloud-ansible/playground.git
+cd playground
+ansible-galaxy install -r roles/requirements.yml
+
+FILE="inventories/centos8/hosts"
+/bin/cat <<EOM >>$FILE
+
+[all:vars]
+ansible_connection=local
+ansible_user=root
+EOM
+
+ansible-playbook playbooks/setup.yml -i inventories/centos8/hosts
+
